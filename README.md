@@ -1,6 +1,6 @@
 Pollbot
 =======
-Pollbot is a [Matrix](https://matrix.org) bot written using [python-matrix-bot-api](https://github.com/python-matrix-bot-api) that allows you to create and vote on polls.
+Pollbot is a [Matrix](https://matrix.org) bot written using [python-matrix-bot-api](https://github.com/shawnanastasio/python-matrix-bot-api) that allows you to create and vote on polls.
 
 Usage
 -----
