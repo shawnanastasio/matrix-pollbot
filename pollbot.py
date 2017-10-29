@@ -4,20 +4,12 @@ from matrix_bot_api.mregex_handler import MRegexHandler
 from matrix_bot_api.mcommand_handler import MCommandHandler
 
 import configparser
+import pickle
 
 # Bot's Matrix credentials
 M_USERNAME = ""
 M_PASSWORD = ""
 M_SERVER = ""
-
-# List of ongoing polls. One per room
-ONGOING_POLLS = []
-
-# List of incomplete poll objects that are being created
-ONGOING_POLLCREATIONS = []
-
-# List of ended polls. Only stores one per room
-ENDED_POLLS = []
 
 class AllMessageHandler(MHandler):
     def __init__(self, handle_callback):
@@ -42,6 +34,24 @@ class Poll(object):
         self.votes = []
 
 
+# Load from existing pickle database, create if unable to load
+try:
+    DB = pickle.load(open("pollbot.pickledb", "rb"))
+except (OSError, IOError):
+    # Ongoing, Incomplete. Ended
+    DB = [[], [], []]
+    pickle.dump(DB, open("pollbot.pickledb", "wb"), 4)
+
+# List of ongoing polls. One per room
+ONGOING_POLLS = DB[0]
+
+# List of incomplete poll objects that are being created
+ONGOING_POLLCREATIONS = DB[1]
+
+# List of ended polls. Only stores one per room
+ENDED_POLLS = DB[2]
+
+
 def newpoll_callback(room, event):
     # Make sure we don't have an ongoing poll for this room
     for poll in ONGOING_POLLS:
@@ -64,6 +74,9 @@ def newpoll_callback(room, event):
     room.send_text("Creating a new poll. Please send the question.")
 
     # When they respond, it will be handled by the ongoing handler
+
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
 # Handles ongoing poll creations
 def ongoing_poll_callback(room, event):
@@ -90,6 +103,9 @@ def ongoing_poll_callback(room, event):
 
         poll.choices.append(event['content']['body'])
         room.send_text("Response added. Send another choice or type !startpoll to start the poll")
+
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
 
 # Starts a poll (moves from an ongoing poll creation to an ongoing poll)
@@ -119,6 +135,10 @@ def startpoll_callback(room, event):
 
     room.send_text("Poll started! Repeat the question with !info")
     info_callback(room, event)
+
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
+
 
 # Display ongoing poll/choices and results
 def info_callback(room, event):
@@ -150,6 +170,7 @@ def info_callback(room, event):
 
     room.send_text(response_str)
 
+
 # End a poll and move it from ONGOING_POLLS to ENDED_POLLS
 def endpoll_callback(room, event):
     # Make sure there's an ongoing poll in the room
@@ -177,6 +198,9 @@ def endpoll_callback(room, event):
 
     room.send_text("Poll ended! See results with !results")
     results_callback(room, event)
+
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
 # Display the results for an ended poll
 def results_callback(room, event):
@@ -252,6 +276,8 @@ def vote_callback(room, event):
 
     room.send_text("%s has voted for '%s'!\n!info - Show current results" % (short_name, choice))
 
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
 # Print help
 def pollhelp_callback(room, event):
