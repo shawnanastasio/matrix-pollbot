@@ -56,13 +56,13 @@ def newpoll_callback(room, event):
     # Make sure we don't have an ongoing poll for this room
     for poll in ONGOING_POLLS:
         if poll.room_id == room.room_id:
-            room.send_text("There's already an ongoing poll in this room! Please end it before starting a new one.")
+            room.send_notice("There's already an ongoing poll in this room! Please end it before starting a new one.")
             return
 
     # Make sure we don't have an ongoing poll creation for this room
     for poll in ONGOING_POLLCREATIONS:
         if poll.room_id == room_id:
-            room.send_text("There's already an ongoing poll in this room! Please end it before starting a new one.")
+            room.send_notice("There's already an ongoing poll in this room! Please end it before starting a new one.")
             return
 
 
@@ -71,7 +71,7 @@ def newpoll_callback(room, event):
     ONGOING_POLLCREATIONS.append(new_poll)
 
     # Prompt the user for a question
-    room.send_text("Creating a new poll. Please send the question.")
+    room.send_notice("Creating a new poll. Please send the question.")
 
     # When they respond, it will be handled by the ongoing handler
 
@@ -95,14 +95,14 @@ def ongoing_poll_callback(room, event):
     # See which part to handle
     if poll.question is None:
         poll.question = event['content']['body']
-        room.send_text("Okay, now send me the choices one by one. Type !startpoll to start the poll.")
+        room.send_notice("Okay, now send me the choices one by one. Type !startpoll to start the poll.")
     else:
         # Handle message as a choice
         if poll.choices is None:
             poll.choices = []
 
         poll.choices.append(event['content']['body'])
-        room.send_text("Response added. Send another choice or type !startpoll to start the poll")
+        room.send_notice("Response added. Send another choice or type !startpoll to start the poll")
 
     # Update database on disk
     pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
@@ -117,23 +117,23 @@ def startpoll_callback(room, event):
             poll = p
             break
     if poll is None:
-        room.send_text("There are no polls you can start!")
+        room.send_notice("There are no polls you can start!")
         return
 
     # Confirm that the poll is ready and move it from ONGOING_POLLCREATIONS to ONGOING_POLLS
     if poll.question is None:
-        room.send_text("You need to send a question first!")
+        room.send_notice("You need to send a question first!")
         return
 
     if poll.choices is None or len(poll.choices) < 2:
-        room.send_text("You need to send at least two choices first!")
+        room.send_notice("You need to send at least two choices first!")
         return
 
     # Remove the poll from ONGOING_POLLCREATIONS and add to ONGOING_POLLS
     ONGOING_POLLCREATIONS.remove(poll)
     ONGOING_POLLS.append(poll)
 
-    room.send_text("Poll started! Repeat the question with !info")
+    room.send_notice("Poll started! Repeat the question with !info")
     info_callback(room, event)
 
     # Update database on disk
@@ -149,7 +149,7 @@ def info_callback(room, event):
             poll = p
             break
     if poll is None:
-        room.send_text("There are no currently ongoing polls! Start a new one with !newpoll")
+        room.send_notice("There are no currently ongoing polls! Start a new one with !newpoll")
         return
 
     response_str = ""
@@ -168,7 +168,7 @@ def info_callback(room, event):
     response_str += "To vote, do !vote <number>\n"
     response_str += "To end the poll, run !endpoll"
 
-    room.send_text(response_str)
+    room.send_notice(response_str)
 
 
 # End a poll and move it from ONGOING_POLLS to ENDED_POLLS
@@ -180,12 +180,12 @@ def endpoll_callback(room, event):
             poll = p
             break
     if poll is None:
-        room.send_text("There are no currently ongoing polls! Start a new one with !newpoll")
+        room.send_notice("There are no currently ongoing polls! Start a new one with !newpoll")
         return
 
     # Make sure the sender is the creator of the poll
     if poll.creator != event['sender']:
-        room.send_text("You can only end polls that you have created!")
+        room.send_notice("You can only end polls that you have created!")
         return
 
     # Remove the poll from ONGOING_POLLS and add to ENDED_POLLS
@@ -196,7 +196,7 @@ def endpoll_callback(room, event):
     ENDED_POLLS = [x for x in ENDED_POLLS if x.room_id != room.room_id]
     ENDED_POLLS.append(poll)
 
-    room.send_text("Poll ended! See results with !results")
+    room.send_notice("Poll ended! See results with !results")
     results_callback(room, event)
 
     # Update database on disk
@@ -211,7 +211,7 @@ def results_callback(room, event):
             poll = p
             break
     if poll is None:
-        room.send_text("There are no previous polls to view!")
+        room.send_notice("There are no previous polls to view!")
         return
 
     response_str = ""
@@ -228,7 +228,7 @@ def results_callback(room, event):
 
     # Add the ending message
     response_str += "To start a new poll, run !newpoll\n"
-    room.send_text(response_str)
+    room.send_notice(response_str)
 
 # Vote for an ongoing poll
 def vote_callback(room, event):
@@ -239,13 +239,13 @@ def vote_callback(room, event):
             poll = p
             break
     if poll is None:
-        room.send_text("There are no currently ongoing polls! Start a new one with !newpoll")
+        room.send_notice("There are no currently ongoing polls! Start a new one with !newpoll")
         return
 
     # Verify arguments
     args = event['content']['body'].split(' ')
     if len(args) != 2:
-        room.send_text("Usage: !vote <number>")
+        room.send_notice("Usage: !vote <number>")
         return
 
 
@@ -257,12 +257,12 @@ def vote_callback(room, event):
     try:
         choice_idx = int(args[1]) - 1
     except:
-        room.send_text("Usage: !vote <number>")
+        room.send_notice("Usage: !vote <number>")
         return
 
     # Verify that the given number corresponds to a choice
     if choice_idx < 0 or choice_idx >= len(poll.choices):
-        room.send_text("Please pick a valid choice! Run !info to repeat the poll")
+        room.send_notice("Please pick a valid choice! Run !info to repeat the poll")
         return
 
     # Add this vote
@@ -274,7 +274,7 @@ def vote_callback(room, event):
     # Get the choice they voted for
     choice = poll.choices[choice_idx]
 
-    room.send_text("%s has voted for '%s'!\n!info - Show current results" % (short_name, choice))
+    room.send_notice("%s has voted for '%s'!\n!info - Show current results" % (short_name, choice))
 
     # Update database on disk
     pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
@@ -287,7 +287,7 @@ def pollhelp_callback(room, event):
     help_str += "!vote      - Vote in an ongoing poll\n"
     help_str += "!endpoll   - End an ongoing poll\n"
     help_str += "!results   - View the results of the last ended poll"
-    room.send_text(help_str)
+    room.send_notice(help_str)
 
 
 def main():
