@@ -61,7 +61,7 @@ def newpoll_callback(room, event):
 
     # Make sure we don't have an ongoing poll creation for this room
     for poll in ONGOING_POLLCREATIONS:
-        if poll.room_id == room_id:
+        if poll.room_id == room.room_id:
             room.send_notice("There's already an ongoing poll in this room! Please end it before starting a new one.")
             return
 
