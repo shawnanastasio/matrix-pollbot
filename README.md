@@ -10,9 +10,13 @@ Requirements
 Docker
 ------------
 First build the image with
+
      docker build -t pollbot .
+
  Now you can start the image
+
      docker run pollbot
+     
  Just configure the config.ini to your own specs.
 
 Usage
