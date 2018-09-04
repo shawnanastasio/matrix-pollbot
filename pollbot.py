@@ -107,6 +107,27 @@ def ongoing_poll_callback(room, event):
     # Update database on disk
     pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
+# Add new response to current poll
+# The command is like !add burger
+def add_response_to_poll(room,event):
+    if len(event['content']['body']) <=5:
+        room.send_notice("No choice was given")
+        return
+    
+    poll = None
+    for p in ONGOING_POLLS:
+        if p.room_id == room.room_id:
+            poll = p
+            break
+    if poll is None:
+        room.send_notice("There are no polls!")
+        return
+    poll.choices.append(event['content']['body'][5:])
+    room.send_notice("Response added.")
+
+    # Update database on disk
+    pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
+    
 
 # Starts a poll (moves from an ongoing poll creation to an ongoing poll)
 def startpoll_callback(room, event):
@@ -281,12 +302,13 @@ def vote_callback(room, event):
 
 # Print help
 def pollhelp_callback(room, event):
-    help_str =  "!newpoll   - Create a new poll\n"
-    help_str += "!startpoll - Start a poll\n"
-    help_str += "!info      - View an ongoing poll\n"
-    help_str += "!vote      - Vote in an ongoing poll\n"
-    help_str += "!endpoll   - End an ongoing poll\n"
-    help_str += "!results   - View the results of the last ended poll"
+    help_str =  "!newpoll      - Create a new poll\n"
+    help_str += "!startpoll    - Start a poll\n"
+    help_str += "!info         - View an ongoing poll\n"
+    help_str += "!vote         - Vote in an ongoing poll\n"
+    help_str += "!endpoll      - End an ongoing poll\n"
+    help_str += "!results      - View the results of the last ended poll\n"
+    help_str += "!add <choice> -  To add the choice to the current poll"
     room.send_notice(help_str)
 
 
@@ -309,6 +331,9 @@ def main():
 
     m_startpoll_handler = MCommandHandler('startpoll', startpoll_callback)
     bot.add_handler(m_startpoll_handler)
+
+    m_add_response_handler = MCommandHandler('add', add_response_to_poll)
+    bot.add_handler(m_add_response_handler)
 
     m_info_handler = MCommandHandler('info', info_callback)
     bot.add_handler(m_info_handler)

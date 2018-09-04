@@ -1,5 +1,5 @@
 [Matrix]
 ; Fill in matrix credentials
-Username:my_username
-Password:my_password
-Homeserver:my_homeserver
+Username:user
+Password:user
+Homeserver:https://matrix.de
