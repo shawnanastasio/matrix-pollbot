@@ -8,6 +8,18 @@ Requirements
 * python-matrix-bot-api (matrix-bot-api on pip)
 
 
+Docker
+------------
+First build the image with
+
+    docker build -t pollbot .
+
+Now you can start the image
+
+    docker run pollbot
+
+Just configure the config.ini to your own specs.
+
 Usage
 -----
 Copy `config.ini.example` to `config.ini` and fill in your bot's Matrix credentials.
