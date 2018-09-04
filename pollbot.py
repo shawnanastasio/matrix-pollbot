@@ -280,12 +280,12 @@ def vote_callback(room, event):
 
 # Print help
 def pollhelp_callback(room, event):
-    help_str =  "!newpoll      - Create a new poll\n"
-    help_str += "!startpoll    - Start a poll\n"
-    help_str += "!info         - View an ongoing poll\n"
-    help_str += "!vote         - Vote in an ongoing poll\n"
-    help_str += "!endpoll      - End an ongoing poll\n"
-    help_str += "!results      - View the results of the last ended poll"
+    help_str =  "!newpoll   - Create a new poll\n"
+    help_str += "!startpoll - Start a poll\n"
+    help_str += "!info      - View an ongoing poll\n"
+    help_str += "!vote      - Vote in an ongoing poll\n"
+    help_str += "!endpoll   - End an ongoing poll\n"
+    help_str += "!results   - View the results of the last ended poll"
     room.send_notice(help_str)
 
 
