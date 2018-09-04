@@ -285,8 +285,7 @@ def pollhelp_callback(room, event):
     help_str += "!info         - View an ongoing poll\n"
     help_str += "!vote         - Vote in an ongoing poll\n"
     help_str += "!endpoll      - End an ongoing poll\n"
-    help_str += "!results      - View the results of the last ended poll\n"
-    help_str += "!add <choice> -  To add the choice to the current poll"
+    help_str += "!results      - View the results of the last ended poll"
     room.send_notice(help_str)
 
 
