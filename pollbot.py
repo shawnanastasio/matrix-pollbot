@@ -113,7 +113,7 @@ def add_response_to_poll(room,event):
     if len(event['content']['body']) <=5:
         room.send_notice("No choice was given")
         return
-    
+ 
     poll = None
     for p in ONGOING_POLLS:
         if p.room_id == room.room_id:
