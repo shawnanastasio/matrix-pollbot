@@ -107,7 +107,6 @@ def ongoing_poll_callback(room, event):
     # Update database on disk
     pickle.dump([ONGOING_POLLS, ONGOING_POLLCREATIONS, ENDED_POLLS], open("pollbot.pickledb", "wb"), 4)
 
-
 # Starts a poll (moves from an ongoing poll creation to an ongoing poll)
 def startpoll_callback(room, event):
     # Make sure there's an ongoing poll creation and it was created by the message sender
