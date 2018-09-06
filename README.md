@@ -7,7 +7,6 @@ Requirements
 * Python 3
 * python-matrix-bot-api (matrix-bot-api on pip)
 
-
 Usage
 -----
 Copy `config.ini.example` to `config.ini` and fill in your bot's Matrix credentials.
