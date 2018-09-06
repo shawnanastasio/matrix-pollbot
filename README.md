@@ -16,7 +16,7 @@ First build the image with
 
 Now you can start the image
 
-    docker run pollbot
+    docker run -t pollbot
 
 Just configure the config.ini to your own specs.
 
