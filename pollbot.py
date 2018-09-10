@@ -15,12 +15,13 @@ M_SERVER = ""
 
 bot = None
 
+
 def checkEventTime(f):
     @wraps(f)
-    def decorated(*args,**kwargs):
+    def decorated(*args, **kwargs):
         event = args[1]
-        if int(time.time()) - int((event['origin_server_ts']/1000))  < 5:
-            return f(*args,**kwargs)
+        if int(time.time()) - int((event['origin_server_ts'] / 1000)) < 5:
+            return f(*args, **kwargs)
     return decorated
 
 
@@ -65,6 +66,7 @@ ONGOING_POLLCREATIONS = DB[1]
 
 # List of ended polls. Only stores one per room
 ENDED_POLLS = DB[2]
+
 
 @checkEventTime
 def newpoll_callback(room, event):
@@ -309,7 +311,7 @@ def results_callback(room, event):
     response_str += "To start a new poll, run !newpoll\n"
     room.send_notice(response_str)
 
-    
+
 # Vote for an ongoing poll
 @checkEventTime
 def vote_callback(room, event):
@@ -367,10 +369,13 @@ def vote_callback(room, event):
                 open("pollbot.pickledb", "wb"),
                 4)
 
-def leave_callback(room,event):
+
+# Pollbot leaves the room
+def leave_callback(room, event):
     global bot
     room.send_notice("Bye bye all. In Love your pollbot")
     bot.client.api.leave_room(room.room_id)
+
 
 # Print help
 @checkEventTime
